@@ -63,19 +63,11 @@ Gemini is used for four things only, none of which touch the verdict:
 
 
 | Use | What it does | If it fails |
-
 |---|---|---|
-
 | `explain_match()` | Puts the engine's decision into plain sentences | Card still renders with the full condition list |
-
 | `answer_followup()` | Answers questions grounded in retrieved record text | Says it has no evidence rather than guessing |
-
 | `simplify_opportunity()` | Rewrites official wording as plain language | Original official text stays on the card |
-
 | `extract_opportunity_from_file()` | Reads an uploaded ad into a structured record | Raw output shown, record marked user-uploaded |
-
-
-
 Every one of them degrades to a clearly-labelled `[Local mock mode]` response with no API key at all. **The app is fully usable offline** — which is also what keeps a demo alive when the venue wifi dies.
 
 
@@ -85,33 +77,21 @@ Every one of them degrades to a clearly-labelled `[Local mock mode]` response wi
 app.py  (Streamlit — three screens: Discover / Read an announcement / How it works)
 
    |
-
    +-- core/data_loader.py ---> data/opportunities/*.json ---> Opportunity
 
    |
-
    +-- core/rules_engine.py    THE decision layer. stdlib only, no LLM, no network,
 
    |        |                  and no user-facing prose.
-
    |        |                  evaluate() -> 15 independent checks,
-
    |        |                                each met | unmet | unknown | n/a
-
    |        |                  roll-up (profile conditions only):
-
    |        |                      any unmet   -> Likely Not Eligible
-
    |        |                      any unknown -> Needs Verification
-
    |        |                      otherwise   -> Likely Eligible
-
    |        +---------------->  the deadline is reported SEPARATELY as listing state,
-
    |                            so a closed listing never reads as "you don't qualify"
-
    |
-
    +-- core/llm_client.py      Gemini: explain / answer / simplify / extract. Mock fallback on each.
 
    +-- core/ad_reader.py       upload bytes -> Gemini JSON -> Opportunity (never written to disk)
@@ -194,17 +174,10 @@ The real `.env` and `.streamlit/secrets.toml` files are ignored by Git. Never co
 
 
 | Setting | Default | Purpose |
-
 |---|---|---|
-
 | `GEMINI_API_KEY` | **(unset)** | Enables the four AI features. Absent means mock mode. |
-
 | `GEMINI_MODEL` | `gemini-3.5-flash` | Override the model without a code change. |
-
 | `SAHULAT_SEMANTIC_SEARCH` | `0` | Set to `1` for multilingual embedding retrieval. Needs the optional dependencies. |
-
-
-
 Read from environment variables or `.streamlit/secrets.toml`.
 
 
@@ -266,19 +239,11 @@ Language switches between **English**, **Urdu** (right-to-left, Nastaliq) and **
 
 
 | Category | Records | What's in it |
-
 |---|---|---|
-
 | Scholarship | 2 | HEC Balochistan / ex-FATA, PEEF Punjab |
-
 | Job | 10 | CSS, FPSC consolidated, four provincial commissions, Punjab Police, Pakistan Post, NADRA, Army LCC |
-
 | Skills | 8 | NAVTTC Hunarmand plus 7 course streams |
-
 | Assistance | 10 | BISP (×3), Bait-ul-Mal (×2), Himmat Card, Zakat Guzara, Sehat Sahulat, interest-free loans, EOBI |
-
-
-
 Jobs are recorded as recruitment **streams** rather than named vacancies, on purpose: an advertised post is true for about three weeks, while the eligibility rules behind the stream are stable year to year — and the rules are what the engine screens on.
 
 
@@ -348,19 +313,11 @@ Everything in `assets/brand/` is generated. **Do not hand-edit it** — change t
 
 
 | Placement | Variant | Reasoning |
-
 |---|---|---|
-
 | Browser tab | `icon-192.png` | Cut from the same artwork, so the tab and the header cannot drift apart |
-
 | App header | `logo-lockup\@2x.png` at 46px | The artwork carries the name in both scripts, so the header no longer repeats it as text |
-
 | Footer | `logo-symbol\@2x.png` at 26px | See the contrast note below |
-
 | This README | `logo-full.png` | The only place with room for the tagline |
-
-
-
 It is deliberately **not** on the home hero. The hero already leads with a headline and a live screening result; a logo there would compete with both, and the header sits directly above it.
 
 
@@ -580,21 +537,12 @@ Leave `chromadb` and `sentence-transformers` commented out in `requirements.txt`
 
 
 | Symptom | Cause | Fix |
-
 |---|---|---|
-
 | `ModuleNotFoundError: No module named 'core'` | Running from the wrong directory | Run from the project root, not `core/` |
-
 | AI still shows `[Local mock mode]` with a key set | The TOML failed to parse | Quote the key: `GEMINI_API_KEY = "..."` |
-
 | Gemini returns 404 for the model | Model retired | Set `GEMINI_MODEL` to a current one; no code change needed |
-
 | First AI call takes \~30s | Embedding model downloading | Only with `SAHULAT_SEMANTIC_SEARCH=1`, and only on first use |
-
 | Cloud deploy fails building torch | Optional dependencies uncommented | Re-comment them; keyword retrieval is the default for a reason |
-
-
-
 ---
 
 
